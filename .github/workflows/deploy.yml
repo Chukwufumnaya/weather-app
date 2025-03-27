@@ -1,58 +1,62 @@
-name: Deploy to GitHub Pages
+  name: Deploy
 
-on:
-  push:
-    branches:
-      - main
+  on:
+    push:
+      branches:
+        - main
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+          
+        - name: Move api-key.js
+          run: |
+            if [ -f "./api-key.js" ] && [ "./api-key.js" != "./api-key.js" ]; then
+              mv ./api-key.js .
+            fi
 
-    steps:
-    # Step 1: Check out the repository
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 2: Create the api-key.js file dynamically
+        - name: Create api-key.js
+        run: |
+            echo "export const apiKey = '${{ secrets.API_KEY }}';" > ./api-key.js
+            echo "const photosApiKey = '${{ secrets.PHOTOS_API_KEY }}';" >> ./api-key.js
+            echo "export const googleApikey = '${{ secrets.GOOGLE_API_KEY }}';" >> ./api-key.js
+            echo "export const googleSearchEngineId = '${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}';" >> ./api-key.js
 
-    # Step 2: Create the api-key.js file dynamically
-    - name: Create api-key.js
-      run: |
-          echo "export const apiKey = '${{ secrets.API_KEY }}';" > ./api-key.js
-          echo "const photosApiKey = '${{ secrets.PHOTOS_API_KEY }}';" >> ./api-key.js
-          echo "export const googleApikey = '${{ secrets.GOOGLE_API_KEY }}';" >> ./api-key.js
-          echo "export const googleSearchEngineId = '${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}';" >> ./api-key.js
+        # Step 3: Configure Git user
+         - name: Configure Git user
+          run: |
+            git config --global user.email "naomiokelue2002@gmail.com"
+            git config --global user.name "Chukwufumnaya"
 
-    # Step 3: Configure Git user
-    - name: Configure Git user
-      run: |
-          git config --global user.email "naomiokelue2002@gmail.com"
-          git config --global user.name "Chukwufumnaya"
+      # Step 4: Ensure gh-pages branch exists
+      - name: Ensure gh-pages branch
+        run: |
+          git fetch origin gh-pages || git checkout --orphan gh-pages
+          git reset --hard
+          git commit --allow-empty -m "Initialize gh-pages branch"
+          git push origin gh-pages || true  # Ignore failure if branch already exists
 
-    # Step 4: Ensure gh-pages branch exists
-    - name: Ensure gh-pages branch
-      run: |
-        git fetch origin gh-pages || git checkout --orphan gh-pages
-        git reset --hard
-        git commit --allow-empty -m "Initialize gh-pages branch"
-        git push origin gh-pages || true  # Ignore failure if branch already exists
-
-    # Step 5: Add the api-key.js file to the gh-pages branch
-    - name: Add api-key.js to gh-pages branch
-      run: |
-        git add -f ./api-key.js  # Force add to bypass .gitignore
-        git commit -m "Add api-key.js with API keys"
-        git push origin gh-pages
-
-    # Step 6: Deploy to GitHub Pages
-    - name: Deploy to GitHub Pages
-      run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      # Step 5: Add the api-key.js file to the gh-pages branch
+      - name: Add api-key.js to gh-pages branch
+        run: |
           git add -f ./api-key.js  # Force add to bypass .gitignore
-          git commit -m 'Deploy to GitHub Pages'
-          git push origin `git subtree split --prefix . main`:refs/heads/gh-pages --force
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
-        
+          git commit -m "Add api-key.js with API keys"
+          git push origin gh-pages
+
+      # Step 6: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        run: |
+            git config --global user.name 'github-actions[bot]'
+            git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+            git add -f ./api-key.js  # Force add to bypass .gitignore
+            git commit -m 'Deploy to GitHub Pages'
+            git push origin `git subtree split --prefix . main`:refs/heads/gh-pages --force
+          uses: peaceiris/actions-gh-pages@v3
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: .
+          
