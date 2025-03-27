@@ -34,7 +34,7 @@ jobs:
         git fetch origin gh-pages || git checkout --orphan gh-pages
         git reset --hard
         git commit --allow-empty -m "Initialize gh-pages branch"
-        git push origin gh-pages
+        git push origin gh-pages || true  # Ignore failure if branch already exists
 
     # Step 5: Deploy to GitHub Pages
     - name: Deploy to GitHub Pages
