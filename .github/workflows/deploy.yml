@@ -44,6 +44,11 @@ jobs:
             git push origin gh-pages
           fi
 
+      - name: Pull latest changes from gh-pages
+        run: |
+          git checkout gh-pages
+          git pull origin gh-pages
+
       - name: Add api-key.js to gh-pages branch
         run: |
           git add -f ./api-key.js
