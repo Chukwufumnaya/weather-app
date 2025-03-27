@@ -3,42 +3,70 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # Trigger the workflow when changes are pushed to the 'main' branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: npm run build
+
+    - name: Deploy to GitHub Pages
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git init
+        git remote add origin https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git
+        git checkout -b gh-pages
+        git add .
+        git commit -m "Deploy to GitHub Pages"
+        git push origin gh-pages --force
+
       # Step 1: Check out the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
       # Step 2: Create the api-key.js file dynamically
-      - name: Create api-key.js
-        run: |
+    - name: Create api-key.js
+      run: |
           echo "export const apiKey = '${{ secrets.API_KEY }}';" > ./api-key.js
           echo "const photosApiKey = '${{ secrets.PHOTOS_API_KEY }}';" >> ./api-key.js
           echo "export const googleApikey = '${{ secrets.GOOGLE_API_KEY }}';" >> ./api-key.js
           echo "export const googleSearchEngineId = '${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}';" >> ./api-key.js
 
       # Step 3: Configure Git user
-      - name: Configure Git user
-        run: |
+    - name: Configure Git user
+      run: |
           git config --global user.email "naomiokelue2002@gmail.com"
           git config --global user.name "Chukwufumnaya"
 
       # Step 4: Ensure gh-pages branch exists
-      - name: Ensure gh-pages branch
-        run: |
+    - name: Ensure gh-pages branch
+      run: |
           git fetch origin gh-pages || git checkout --orphan gh-pages
           git reset --hard
           git commit --allow-empty -m "Initialize gh-pages branch"
           git push origin gh-pages
 
       # Step 5: Deploy to GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
