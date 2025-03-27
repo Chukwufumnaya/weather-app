@@ -39,7 +39,7 @@ jobs:
     # Step 5: Add the api-key.js file to the gh-pages branch
     - name: Add api-key.js to gh-pages branch
       run: |
-        git add ./api-key.js
+        git add -f ./api-key.js  # Force add to bypass .gitignore
         git commit -m "Add api-key.js with API keys"
         git push origin gh-pages
 
