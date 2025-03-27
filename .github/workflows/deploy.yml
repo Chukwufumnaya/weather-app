@@ -22,8 +22,15 @@ jobs:
           echo "export const googleApikey = '${{ secrets.GOOGLE_API_KEY }}';" >> ./api-key.js
           echo "export const googleSearchEngineId = '${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}';" >> ./api-key.js
 
+     # Step 3: Ensure gh-pages branch exists
+      - name: Ensure gh-pages branch
+        run: |
+          git fetch origin gh-pages || git checkout --orphan gh-pages
+          git reset --hard
+          git commit --allow-empty -m "Initialize gh-pages branch"
+          git push origin gh-pages
 
-      # Step 3: Deploy to GitHub Pages
+      # Step 4: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
