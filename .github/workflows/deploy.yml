@@ -14,25 +14,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Step 2: Create the api-key.js file dynamically
+    # Step 2: Create the api-key.js file dynamically using environment variables
     - name: Create api-key.js
       run: |
-          echo "export const apiKey = '${{ secrets.API_KEY }}';" > ./api-key.js
-          echo "const photosApiKey = '${{ secrets.PHOTOS_API_KEY }}';" >> ./api-key.js
-          echo "export const googleApikey = '${{ secrets.GOOGLE_API_KEY }}';" >> ./api-key.js
-          echo "export const googleSearchEngineId = '${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}';" >> ./api-key.js
+          echo "export const apiKey = process.env.API_KEY;" > ./api-key.js
+          echo "const photosApiKey = process.env.PHOTOS_API_KEY;" >> ./api-key.js
+          echo "export const googleApikey = process.env.GOOGLE_API_KEY;" >> ./api-key.js
+          echo "export const googleSearchEngineId = process.env.GOOGLE_SEARCH_ENGINE_ID;" >> ./api-key.js
+      env:
+          API_KEY: ${{ secrets.API_KEY }}
+          PHOTOS_API_KEY: ${{ secrets.PHOTOS_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_SEARCH_ENGINE_ID: ${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}
 
-    # Step 3: Move api-key.js to build directory
-    - name: Move api-key.js to build directory
-      run: mv ./api-key.js .
-
-    # Step 4: Configure Git user
+    # Step 3: Configure Git user
     - name: Configure Git user
       run: |
           git config --global user.email "naomiokelue2002@gmail.com"
           git config --global user.name "Chukwufumnaya"
 
-    # Step 5: Ensure gh-pages branch exists
+    # Step 4: Ensure gh-pages branch exists
     - name: Ensure gh-pages branch
       run: |
         git fetch origin gh-pages || git checkout --orphan gh-pages
@@ -40,7 +41,7 @@ jobs:
         git commit --allow-empty -m "Initialize gh-pages branch"
         git push origin gh-pages || true  # Ignore failure if branch already exists
 
-    # Step 6: Deploy to GitHub Pages
+    # Step 5: Deploy to GitHub Pages
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
