@@ -1,0 +1,31 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Trigger the workflow when changes are pushed to the 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Create the api-key.js file dynamically
+      - name: Create api-key.js
+        run: |
+          echo "export const apiKey = '${{ secrets.API_KEY }}';" > ./api-key.js
+          echo "const photosApiKey = '${{ secrets.PHOTOS_API_KEY }}';" >> ./api-key.js
+          echo "export const googleApikey = '${{ secrets.GOOGLE_API_KEY }}';" >> ./api-key.js
+          echo "export const googleSearchEngineId = '${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}';" >> ./api-key.js
+
+
+      # Step 3: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
